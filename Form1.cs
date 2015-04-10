@@ -10,6 +10,9 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 //using System.Windows.Input;
 
+//TO-DO: 1. Multi branches on each side
+//       2. Fix face wall view
+
 namespace WindowsFormsApplication5
 {
     public partial class Form1 : Form
@@ -118,11 +121,17 @@ namespace WindowsFormsApplication5
 
             Brush middle_wall_color_type;
 
-            LinearGradientBrush linGrBrush = new LinearGradientBrush(
+            LinearGradientBrush leftBrush = new LinearGradientBrush(
               new Point(0, 10),
               new Point(200, 10),
               Color.Gray,
               Color.Black);
+
+            LinearGradientBrush rightBrush = new LinearGradientBrush(
+              new Point(0, 10),
+              new Point(200, 10),
+              Color.Black,
+              Color.Gray);
 
             public LinearGradientBrush CeilingBrush = new LinearGradientBrush(
                          new Point(0, 0),
@@ -171,20 +180,14 @@ namespace WindowsFormsApplication5
 
             public void leftnoBranchView(List<wall> lists, Point x, Point y, Point z, Point w)
             {
-                LinearGradientBrush linGrBrush = new LinearGradientBrush(
-                  new Point(0, 10),
-                  new Point(200, 10),
-                  Color.Gray,
-                  Color.Black);
-
                 // left wall
-                lists.Add(new wall(x, y, z, w, linGrBrush));//Brushes.LightGray));
+                lists.Add(new wall(x, y, z, w, leftBrush));//Brushes.LightGray));
             }
 
             public void rightnoBranchView(List<wall> lists, Point x, Point y, Point z, Point w)
             {
                 // right wall
-                lists.Add(new wall(x, y, z, w, linGrBrush));//Brushes.Gray));
+                lists.Add(new wall(x, y, z, w, rightBrush));//Brushes.Gray));
             }
 
             public void noBranchView(List<wall> lists)
@@ -197,7 +200,7 @@ namespace WindowsFormsApplication5
                 lists.Add(new wall(new Point(236, 98), new Point(336, 18), new Point(336, 218), new Point(236, 148), Brushes.Gray));
             }
 
-            public void leftBranchView(int state, List<wall> lists)
+            public void leftBranchView(int state, bool forward, List<wall> lists)
             {
                 int p1 = 0;
                 int p2 = 0;
@@ -227,9 +230,17 @@ namespace WindowsFormsApplication5
                         p3 = 36 + 80 + 10;
                         break;
                 }
-                lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218), linGrBrush));//Brushes.LightGray));
-                lists.Add(new wall(new Point(p1, getLeftUpperCoordY(p3)), new Point(p3, getLeftUpperCoordY(p3)), new Point(p3, getLeftLowerCoordY(p3)), new Point(p1, getLeftLowerCoordY(p3)), Brushes.DarkGray));
-                lists.Add(new wall(new Point(p3, getLeftUpperCoordY(p3)), var_ul, var_ll, new Point(p3, getLeftLowerCoordY(p3)), linGrBrush));//Brushes.SlateGray));
+                lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218), leftBrush));//Brushes.LightGray));
+
+                if (forward == true)
+                {
+                    lists.Add(new wall(new Point(p1, var_ul.Y), var_ul, var_ll, new Point(p1, var_ll.Y), Brushes.Gray));
+                }
+                else
+                {
+                    lists.Add(new wall(new Point(p1, getLeftUpperCoordY(p3)), new Point(p3, getLeftUpperCoordY(p3)), new Point(p3, getLeftLowerCoordY(p3)), new Point(p1, getLeftLowerCoordY(p3)), Brushes.DarkGray));
+                    lists.Add(new wall(new Point(p3, getLeftUpperCoordY(p3)), var_ul, var_ll, new Point(p3, getLeftLowerCoordY(p3)), leftBrush));//Brushes.SlateGray));
+                }
             }
 
 
@@ -240,25 +251,33 @@ namespace WindowsFormsApplication5
 
                 
 
-                middle_wall_color_type = Brushes.Gray;
+               
                 switch (state)
                 {
                     case 0:
                         x1 = 136;
                         x2 = 236;
-                        middle_wall_color_type = Brushes.Black;
+                        middle_wall_color_type = Brushes.DimGray;
                         break;
                     case 1:
                         x1 = 136 - 20;
                         x2 = 236 + 20;
+                        middle_wall_color_type = Brushes.Gray;
                         break;
                     case 2:
                         x1 = 136 - 40;
                         x2 = 236 + 40;
+                        middle_wall_color_type = Brushes.DarkGray;
                         break;
                     case 3:
                         x1 = 136 - 70;
                         x2 = 236 + 70;
+                        middle_wall_color_type = Brushes.LightGray;
+                        break;
+                    case 5:
+                        x1 = 136;
+                        x2 = 236;
+                        middle_wall_color_type = Brushes.Black;
                         break;
                 }
 
@@ -277,7 +296,7 @@ namespace WindowsFormsApplication5
                 lists.Add(new wall(var_ul, var_ur, var_lr, var_ll, middle_wall_color_type));
             }
 
-            public void rightBranchView(int state, List<wall> lists)
+            public void rightBranchView(int state, bool forward, List<wall> lists)
             {
                 int p1 = 0;
                 int p2 = 0;
@@ -306,10 +325,18 @@ namespace WindowsFormsApplication5
                         p3 = 236 + 80 + 20;
                         break;
                 }
-                lists.Add(new wall(var_ur, new Point(p1, getRightUpperCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), var_lr, linGrBrush));//Brushes.Gray));
-                lists.Add(new wall(new Point(p1, getRightUpperCoordY(p1)), new Point(p2, getRightUpperCoordY(p1)), new Point(p2, getRightLowerCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), Brushes.Gray));
-                lists.Add(new wall(new Point(p3, getRightUpperCoordY(p3)), new Point(336, 18), new Point(336, 218), new Point(p3, getRightLowerCoordY(p3)), linGrBrush));//Brushes.Gray));
 
+                if (forward == true)
+                {
+                    lists.Add(new wall(var_ur, new Point(p3, var_ur.Y), new Point(p3, var_lr.Y), var_lr, Brushes.Gray));//Brushes.Gray));
+                }
+                else
+                {
+                    lists.Add(new wall(var_ur, new Point(p1, getRightUpperCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), var_lr, rightBrush));//Brushes.Gray));
+                    lists.Add(new wall(new Point(p1, getRightUpperCoordY(p1)), new Point(p2, getRightUpperCoordY(p1)), new Point(p2, getRightLowerCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), Brushes.Gray));
+                }
+
+                lists.Add(new wall(new Point(p3, getRightUpperCoordY(p3)), new Point(336, 18), new Point(336, 218), new Point(p3, getRightLowerCoordY(p3)), rightBrush));//Brushes.Gray));
             }
 
             public Point[] traceCeilingpoints(List<wall> lists)
@@ -346,9 +373,9 @@ namespace WindowsFormsApplication5
         int[,] map = new int[map_x, map_y]{
                                   {1,1,1,0,0,0,1,1,1,0},
                                   {1,0,1,1,1,1,1,0,1,0},
-                                  {1,1,0,0,0,0,0,1,1,0},
-                                  {0,1,1,1,0,0,0,1,0,0},
-                                  {0,0,0,1,1,0,0,1,0,0},
+                                  {1,0,0,0,0,0,0,1,1,0},
+                                  {1,1,1,1,1,0,0,1,0,0},
+                                  {0,0,0,0,1,0,0,1,0,0},
                                   {0,0,0,0,1,0,0,1,0,0},
                                   {0,0,0,0,1,0,0,1,0,0},
                                   {0,0,0,0,1,0,0,1,1,0},
@@ -393,6 +420,8 @@ namespace WindowsFormsApplication5
                     
                 }
 
+                Console.WriteLine("p="+temp_p);
+
                 if (getMapInfo(temp_p) == 0)
                     break;
 
@@ -405,6 +434,36 @@ namespace WindowsFormsApplication5
 
                 count_forward++;
             }
+
+
+            if (count_forward == 4)
+            {
+                temp_p = p;
+
+                switch (dir)
+                {
+                    case DIR.SOUTH:
+                        temp_p.X = p.X + 4;
+                        break;
+                    case DIR.NORTH:
+                        temp_p.X = p.X - 4;
+                        break;
+                    case DIR.EAST:
+                        temp_p.Y = p.Y + 4;
+                        break;
+                    case DIR.WEST:
+                        temp_p.Y = p.Y - 4;
+                        break;
+
+                }
+
+                if (getMapInfo(temp_p) == 1)
+                {
+                    count_forward++;
+                    Console.WriteLine("forward + 1");
+                }
+            }
+
 
             status[2, 0] = count_forward;
             status[2, 1] = 4;
@@ -454,17 +513,22 @@ namespace WindowsFormsApplication5
             int left_view = 10;
             int right_view = 10;
             int forward = 0;
+            int one_or_two_branches = 0;
 
             for (int i = 0; i < 3; i++)
                 if (view[i, 1] > 0)
                 {
+                    
+
                     switch (view[i, 1])
                     {
                         case 1:
                             left_view = view[i, 0];
+                            one_or_two_branches += view[i, 1];
                             break;
                         case 2:
                             right_view = view[i, 0];
+                            one_or_two_branches += view[i, 1];
                             break;
                         case 3:
                             left_view = right_view = view[i, 0];
@@ -474,21 +538,46 @@ namespace WindowsFormsApplication5
                             break;
                     }
                 }
+            
             Console.WriteLine("view=" + left_view + right_view);
+            
+            bool left_wall_two_or_three_pieces;
+            bool right_wall_two_or_three_pieces;
+
+            // only one side branch
+            left_wall_two_or_three_pieces = right_wall_two_or_three_pieces = (one_or_two_branches < 3 && one_or_two_branches > 0);
+            Console.WriteLine("bool1=" + left_wall_two_or_three_pieces);
+            // left side branch is closer than right side branch
+            left_wall_two_or_three_pieces |= (left_view > right_view);
+            Console.WriteLine("bool2=" + left_wall_two_or_three_pieces);
+            // start point or stop point
+            left_wall_two_or_three_pieces &= (forward - 1) == left_view;
+            Console.WriteLine("bool3=" + left_wall_two_or_three_pieces);
+
+            // left side branch is closer than right side branch
+            right_wall_two_or_three_pieces |= (left_view < right_view);
+            Console.WriteLine("bool4=" + right_wall_two_or_three_pieces);
+            // start point or stop point
+            right_wall_two_or_three_pieces &= (forward - 1) == right_view;
+            Console.WriteLine("bool5=" + right_wall_two_or_three_pieces);
 
             mainview.clearView(walls);
-            mainview.setMiddleView(4-forward);
+            if(forward == 5)
+                mainview.setMiddleView(5);
+            else
+                mainview.setMiddleView(4-forward);
+            Console.WriteLine("middle=" + forward);
 
             if (left_view == 10)
                 mainview.leftnoBranchView(walls, mainview.fix_ul, mainview.getInnerWinUpperLeft(), mainview.getInnerWinLowerLeft(), mainview.fix_ll);
             else
-                mainview.leftBranchView(3 - left_view, walls);
+                mainview.leftBranchView(3 - left_view, left_wall_two_or_three_pieces, walls);
             mainview.middleView(walls);
             
             if (right_view == 10)
                 mainview.rightnoBranchView(walls, mainview.getInnerWinUpperRight(), mainview.fix_ur, mainview.fix_lr, mainview.getInnerWinLowerRight());
             else
-                mainview.rightBranchView(3 - right_view, walls);
+                mainview.rightBranchView(3 - right_view, right_wall_two_or_three_pieces, walls);
         }
 
         eyeview mainview = new eyeview();
