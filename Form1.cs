@@ -48,13 +48,15 @@ namespace WindowsFormsApplication5
         class wall
         {
             Point upper_left,upper_right,lower_left,lower_right;
+            Brush color;
 
-            public wall(Point ul, Point ur, Point lr, Point ll)
+            public wall(Point ul, Point ur, Point lr, Point ll, Brush color)
             {
                 this.upper_left = ul;
                 this.upper_right = ur;
                 this.lower_right = lr;
                 this.lower_left = ll;
+                this.color = color;
             }
 
             public override string ToString()
@@ -93,6 +95,11 @@ namespace WindowsFormsApplication5
                 wallpoints[3] = this.lower_left;
                 return wallpoints;
             }
+
+            public Brush getWallColor()
+            {
+                return color;
+            }
         }
 
 
@@ -108,6 +115,26 @@ namespace WindowsFormsApplication5
             Point var_ll = new Point(136, 148);
             Point var_ur = new Point(236, 98);
             Point var_lr = new Point(236, 148);
+
+            Brush middle_wall_color_type;
+
+            LinearGradientBrush linGrBrush = new LinearGradientBrush(
+              new Point(0, 10),
+              new Point(200, 10),
+              Color.Gray,
+              Color.Black);
+
+            public LinearGradientBrush CeilingBrush = new LinearGradientBrush(
+                         new Point(0, 0),
+                         new Point(0, 100),
+                         Color.Aqua,
+                         Color.Black);
+
+            public LinearGradientBrush FloorBrush = new LinearGradientBrush(
+             new Point(0, 0),
+             new Point(0, 110),
+             Color.Black,
+             Color.Red);
 
             public void setInnerWin(Point x, Point y, Point z, Point w)
             {
@@ -144,24 +171,30 @@ namespace WindowsFormsApplication5
 
             public void leftnoBranchView(List<wall> lists, Point x, Point y, Point z, Point w)
             {
+                LinearGradientBrush linGrBrush = new LinearGradientBrush(
+                  new Point(0, 10),
+                  new Point(200, 10),
+                  Color.Gray,
+                  Color.Black);
+
                 // left wall
-                lists.Add(new wall(x,y,z,w));
+                lists.Add(new wall(x, y, z, w, linGrBrush));//Brushes.LightGray));
             }
 
             public void rightnoBranchView(List<wall> lists, Point x, Point y, Point z, Point w)
             {
                 // right wall
-                lists.Add(new wall(x,y,z,w));
+                lists.Add(new wall(x, y, z, w, linGrBrush));//Brushes.Gray));
             }
 
             public void noBranchView(List<wall> lists)
             {
                 // left wall
-                lists.Add(new wall(new Point(36, 18), new Point(136, 98), new Point(136, 148), new Point(36, 218)));
+                lists.Add(new wall(new Point(36, 18), new Point(136, 98), new Point(136, 148), new Point(36, 218), Brushes.Gray));
                 // middle wall
-                lists.Add(new wall(new Point(136, 98), new Point(236, 98), new Point(236, 148), new Point(136, 148)));
+                lists.Add(new wall(new Point(136, 98), new Point(236, 98), new Point(236, 148), new Point(136, 148), Brushes.Gray));
                 // right wall
-                lists.Add(new wall(new Point(236, 98), new Point(336, 18), new Point(336, 218), new Point(236, 148)));
+                lists.Add(new wall(new Point(236, 98), new Point(336, 18), new Point(336, 218), new Point(236, 148), Brushes.Gray));
             }
 
             public void leftBranchView(int state, List<wall> lists)
@@ -169,6 +202,7 @@ namespace WindowsFormsApplication5
                 int p1 = 0;
                 int p2 = 0;
                 int p3 = 0;
+
 
                 switch (state)
                 {
@@ -193,9 +227,9 @@ namespace WindowsFormsApplication5
                         p3 = 36 + 80 + 10;
                         break;
                 }
-                lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218)));
-                lists.Add(new wall(new Point(p1, getLeftUpperCoordY(p3)), new Point(p3, getLeftUpperCoordY(p3)), new Point(p3, getLeftLowerCoordY(p3)), new Point(p1, getLeftLowerCoordY(p3))));
-                lists.Add(new wall(new Point(p3, getLeftUpperCoordY(p3)), var_ul, var_ll, new Point(p3, getLeftLowerCoordY(p3))));
+                lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218), linGrBrush));//Brushes.LightGray));
+                lists.Add(new wall(new Point(p1, getLeftUpperCoordY(p3)), new Point(p3, getLeftUpperCoordY(p3)), new Point(p3, getLeftLowerCoordY(p3)), new Point(p1, getLeftLowerCoordY(p3)), Brushes.DarkGray));
+                lists.Add(new wall(new Point(p3, getLeftUpperCoordY(p3)), var_ul, var_ll, new Point(p3, getLeftLowerCoordY(p3)), linGrBrush));//Brushes.SlateGray));
             }
 
 
@@ -204,11 +238,15 @@ namespace WindowsFormsApplication5
                 int x1 = 0;
                 int x2 = 0;
 
+                
+
+                middle_wall_color_type = Brushes.Gray;
                 switch (state)
                 {
                     case 0:
                         x1 = 136;
                         x2 = 236;
+                        middle_wall_color_type = Brushes.Black;
                         break;
                     case 1:
                         x1 = 136 - 20;
@@ -236,7 +274,7 @@ namespace WindowsFormsApplication5
 
             public void middleView(List<wall> lists)
             {
-                lists.Add(new wall(var_ul, var_ur, var_lr, var_ll));
+                lists.Add(new wall(var_ul, var_ur, var_lr, var_ll, middle_wall_color_type));
             }
 
             public void rightBranchView(int state, List<wall> lists)
@@ -268,9 +306,9 @@ namespace WindowsFormsApplication5
                         p3 = 236 + 80 + 20;
                         break;
                 }
-                lists.Add(new wall(var_ur, new Point(p1, getRightUpperCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), var_lr));
-                lists.Add(new wall(new Point(p1, getRightUpperCoordY(p1)), new Point(p2, getRightUpperCoordY(p1)), new Point(p2, getRightLowerCoordY(p1)), new Point(p1, getRightLowerCoordY(p1))));
-                lists.Add(new wall(new Point(p3, getRightUpperCoordY(p3)), new Point(336, 18), new Point(336, 218), new Point(p3, getRightLowerCoordY(p3))));
+                lists.Add(new wall(var_ur, new Point(p1, getRightUpperCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), var_lr, linGrBrush));//Brushes.Gray));
+                lists.Add(new wall(new Point(p1, getRightUpperCoordY(p1)), new Point(p2, getRightUpperCoordY(p1)), new Point(p2, getRightLowerCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), Brushes.Gray));
+                lists.Add(new wall(new Point(p3, getRightUpperCoordY(p3)), new Point(336, 18), new Point(336, 218), new Point(p3, getRightLowerCoordY(p3)), linGrBrush));//Brushes.Gray));
 
             }
 
@@ -306,7 +344,7 @@ namespace WindowsFormsApplication5
         private const int map_y = 10;
 
         int[,] map = new int[map_x, map_y]{
-                                  {1,0,1,0,0,0,1,1,1,0},
+                                  {1,1,1,0,0,0,1,1,1,0},
                                   {1,0,1,1,1,1,1,0,1,0},
                                   {1,1,0,0,0,0,0,1,1,0},
                                   {0,1,1,1,0,0,0,1,0,0},
@@ -459,8 +497,7 @@ namespace WindowsFormsApplication5
             InitializeComponent();
             
             int[,] view = getPathInfo(direction, whereami);
-            createMainView(view, mainview);
-            
+            createMainView(view, mainview); 
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
@@ -470,21 +507,24 @@ namespace WindowsFormsApplication5
             foreach(var wall in walls)
             {
                 panelPath.AddPolygon(wall.getWallPoints());
-                e.Graphics.FillPath(Brushes.Gray, panelPath);
+                e.Graphics.FillPath(wall.getWallColor(), panelPath);
                 e.Graphics.DrawPath(blackPen, panelPath);
+
+                panelPath.Reset();
             }
-            panelPath.Reset();
+           
 
             //ceiling
             panelPath.AddPolygon(mainview.traceCeilingpoints(walls));
-            e.Graphics.FillPath(Brushes.Aqua, panelPath);
+            e.Graphics.FillPath(mainview.CeilingBrush, panelPath);
             //e.Graphics.DrawPath(blackPen, panelPath);
             panelPath.Reset();
 
             //floor
             panelPath.AddPolygon(mainview.traceFloorpoints(walls));
-            e.Graphics.FillPath(Brushes.Chocolate, panelPath);
+            e.Graphics.FillPath(mainview.FloorBrush, panelPath);
             //e.Graphics.DrawPath(blackPen, panelPath);
+
         }
 
         private void timer1_Tick(object sender, EventArgs e)
