@@ -17,7 +17,7 @@ namespace WindowsFormsApplication5
 {
     public partial class Form1 : Form
     {
-        Pen blackPen = new Pen(Color.Black, 3);
+        Pen blackPen = new Pen(Color.Black, 1);
         Pen bluePen = new Pen(Color.Blue, 3);
         Pen grayPen = new Pen(Color.Gray, 3);
 
@@ -499,6 +499,7 @@ public class eyeview
         int p1 = 0;
         int p2 = 0;
         int p3 = 0;
+        Brush color = Brushes.Black;
 
         switch (state)
         {
@@ -506,28 +507,33 @@ public class eyeview
                 p1 = 36 + 0;
                 p2 = 36 + 20;
                 p3 = 36 + 20;
+                color = Brushes.LightGray;
                 break;
             case 2:
                 p1 = 36 + 10;
                 p2 = 36 + 10 + 40;
                 p3 = 36 + 10 + 40;
+                color = Brushes.DarkGray;
+                
                 break;
             case 1:
                 p1 = 36 + 35;
                 p2 = 36 + 35 + 35;
                 p3 = 36 + 35 + 35;
+                color = Brushes.Gray;
                 break;
             case 0:
                 p1 = 36 + 80;
                 p2 = 36 + 80 + 10;
                 p3 = 36 + 80 + 10;
+                color = Brushes.DimGray;
                 break;
         }
         lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218), leftWallBrush));
 
         if (two_walls == true)
         {
-            lists.Add(new wall(new Point(p1, x.Y), x, y, new Point(p1, y.Y), Brushes.Gray));
+            lists.Add(new wall(new Point(p1, x.Y), x, y, new Point(p1, y.Y), color));
         }
         else
         {
@@ -593,6 +599,7 @@ public class eyeview
         int p1 = 0;
         int p2 = 0;
         int p3 = 0;
+        Brush color = Brushes.Black;
 
         switch (state)
         {
@@ -600,27 +607,31 @@ public class eyeview
                 p1 = 236 + 10;
                 p2 = 236 + 10 + 10;
                 p3 = 236 + 10 + 10;
+                color = Brushes.DimGray;
                 break;
             case 1:
                 p1 = 236 + 30;
                 p2 = 236 + 30 + 35;
                 p3 = 236 + 30 + 35;
+                color = Brushes.Gray;
                 break;
             case 2:
                 p1 = 236 + 50;
                 p2 = 236 + 50 + 40;
                 p3 = 236 + 50 + 40;
+                color = Brushes.DarkGray;
                 break;
             case 3:
                 p1 = 236 + 80;
                 p2 = 236 + 80 + 20;
                 p3 = 236 + 80 + 20;
+                color = Brushes.LightGray;
                 break;
         }
 
         if (two_walls == true)
         {
-            lists.Add(new wall(x, new Point(p3, x.Y), new Point(p3, y.Y), y, Brushes.Gray));
+            lists.Add(new wall(x, new Point(p3, x.Y), new Point(p3, y.Y), y, color));
         }
         else
         {
