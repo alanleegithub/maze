@@ -11,7 +11,6 @@ using System.Drawing.Drawing2D;
 //using System.Windows.Input;
 
 //TO-DO: 1. Multi branches on each side
-//       2. Fix face wall view
 
 namespace WindowsFormsApplication5
 {
@@ -25,9 +24,11 @@ namespace WindowsFormsApplication5
 
         private const int map_x = 10;
         private const int map_y = 10;
+        private const int map_level = 2;
 
-        int[,] map = new int[map_x, map_y]{
-                                  {1,1,1,0,0,0,1,1,1,0},
+        int[,,] map = new int[map_level, map_x, map_y]{
+                                  
+                                 {{1,0,1,0,0,0,1,1,1,0},
                                   {1,0,1,1,1,1,1,0,1,0},
                                   {1,0,0,0,0,0,0,1,1,0},
                                   {1,1,1,1,1,0,0,1,0,0},
@@ -36,12 +37,24 @@ namespace WindowsFormsApplication5
                                   {0,0,0,0,1,0,0,1,0,0},
                                   {0,0,0,0,1,0,0,1,1,0},
                                   {0,0,0,0,1,0,0,0,1,0},
-                                  {0,0,0,0,1,1,1,1,1,0}
+                                  {0,0,0,0,1,1,1,1,1,0}},
+
+                                 {{1,0,0,1,1,1,0,0,0,0},
+                                  {1,1,1,1,0,1,1,1,0,0},
+                                  {0,0,0,0,0,0,0,1,1,1},
+                                  {1,1,1,0,1,0,0,0,0,1},
+                                  {1,0,1,0,0,0,0,1,1,1},
+                                  {1,0,1,1,1,1,0,1,0,0},
+                                  {1,1,0,0,0,1,0,1,1,1},
+                                  {0,1,1,0,1,1,0,0,0,1},
+                                  {0,0,1,0,1,0,0,0,1,1},
+                                  {1,1,1,0,1,1,1,1,1,0}}
         };
 
         enum DIR { EAST, SOUTH, WEST, NORTH };
         DIR direction = DIR.SOUTH;
         Point whereami = new Point(0, 0);
+        int level_now = 0;
 
         Point fix_ul = new Point(36, 18);
         Point fix_ll = new Point(36, 218);
@@ -59,7 +72,7 @@ namespace WindowsFormsApplication5
         {
             if (point.X > (map_x - 1) || point.Y > (map_y-1)) return 0;
             if (point.X < 0 || point.Y < 0) return 0;
-            return map[point.X, point.Y];
+            return map[level_now, point.X, point.Y];
         }
 
         int[,] getPathInfo(DIR dir, Point p)
@@ -146,27 +159,27 @@ namespace WindowsFormsApplication5
             switch (dir)
             {
                 case DIR.SOUTH:
-                    if (p.Y + 1 < map_y && map[p.X, p.Y + 1] == 1)
+                    if (p.Y + 1 < map_y && map[level_now, p.X, p.Y + 1] == 1)
                         status = 1;//EAST, LEFT
-                    if (p.Y-1 >=0 && map[p.X, p.Y - 1] == 1)
+                    if (p.Y - 1 >= 0 && map[level_now, p.X, p.Y - 1] == 1)
                         status += 2;//WEST, RIGHT
                     break;
                 case DIR.NORTH:
-                    if (p.Y + 1 < map_y && map[p.X, p.Y + 1] == 1)
+                    if (p.Y + 1 < map_y && map[level_now, p.X, p.Y + 1] == 1)
                         status = 2;//EAST, RIGHT
-                    if (p.Y - 1 >= 0 && map[p.X, p.Y - 1] == 1)
+                    if (p.Y - 1 >= 0 && map[level_now, p.X, p.Y - 1] == 1)
                         status += 1;//WEST, LEFT
                     break;
                 case DIR.EAST:
-                    if (p.X + 1 < map_x && map[p.X + 1, p.Y] == 1)
+                    if (p.X + 1 < map_x && map[level_now, p.X + 1, p.Y] == 1)
                         status = 2;//SOUTH, RIGHT
-                    if (p.X-1>=0 && map[p.X-1, p.Y] == 1)
+                    if (p.X - 1 >= 0 && map[level_now, p.X - 1, p.Y] == 1)
                         status += 1;//NORTH, LEFT
                     break;
                 case DIR.WEST:
-                    if (p.X + 1 < map_x && map[p.X + 1, p.Y] == 1)
+                    if (p.X + 1 < map_x && map[level_now, p.X + 1, p.Y] == 1)
                         status = 1;//SOUTH, LEFT
-                    if (p.X - 1 >= 0 && map[p.X - 1, p.Y] == 1)
+                    if (p.X - 1 >= 0 && map[level_now, p.X - 1, p.Y] == 1)
                         status += 2;//NORTH, RIGHT
                     break;
             }
@@ -178,7 +191,6 @@ namespace WindowsFormsApplication5
             int left_view = 10;
             int right_view = 10;
             int forward_steps = 0;
-            int one_or_two_branches = 0;
             bool left_view_two_walls;
             bool right_view_two_walls;
             Brush color;
@@ -193,11 +205,9 @@ namespace WindowsFormsApplication5
                     {
                         case 1:
                             left_view = view[i, 0];
-                            one_or_two_branches += view[i, 1];
                             break;
                         case 2:
                             right_view = view[i, 0];
-                            one_or_two_branches += view[i, 1];
                             break;
                         case 3:
                             left_view = right_view = view[i, 0];
@@ -211,35 +221,32 @@ namespace WindowsFormsApplication5
             //Console.WriteLine("view=" + left_view + right_view);
 
             // only one side branch
-            left_view_two_walls = right_view_two_walls = (one_or_two_branches < 3 && one_or_two_branches > 0);
-            //Console.WriteLine("bool1=" + left_view_two_walls);
+            left_view_two_walls = right_view_two_walls = (left_view == 10 || right_view == 10);
             // left side branch position is closer than right side branch
             left_view_two_walls |= (left_view > right_view);
-            //Console.WriteLine("bool2=" + left_view_two_walls);
             // left side branch position is the same with right side branch 
             left_view_two_walls |= (left_view == right_view);
-            //Console.WriteLine("bool4=" + left_view_two_walls);
             // start point or stop point
             left_view_two_walls &= (forward_steps - 1) == left_view;
-            //Console.WriteLine("bool3=" + left_view_two_walls + " " + left_view + " " + forward_steps);
             leftview_walls = left_view_two_walls ? eyeview.Composition.BY_TWO : eyeview.Composition.BY_THREE;
-
-
+            
             // right side branch position is closer than left side branch
             right_view_two_walls |= (left_view < right_view);
             // right side branch position is the same with left side branch 
             right_view_two_walls |= (left_view == right_view);
-            //Console.WriteLine("bool4=" + right_view_two_walls);
             // start point or stop point
             right_view_two_walls &= (forward_steps - 1) == right_view;
-            //Console.WriteLine("bool5=" + right_view_two_walls);
             rightview_walls = right_view_two_walls ? eyeview.Composition.BY_TWO : eyeview.Composition.BY_THREE;
 
+            //Console.WriteLine("bool=" + left_view + " "
+            //                          + right_view + " "
+            //                          + forward_steps);
+
             mainview.clearView(walls);
-            if (forward_steps == 5)
-                color = mainview.setMiddleView(5, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
-            else
+            if (forward_steps <= 4)
                 color = mainview.setMiddleView(4 - forward_steps, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
+            else
+                color = mainview.setMiddleView(forward_steps, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
             //Console.WriteLine("forward_steps=" + forward_steps);
             //Console.WriteLine("middle point={0} {1} {2} {3}", var_ll, var_lr, var_ul, var_ur);
             label1.Text = direction + " " + whereami;
@@ -264,6 +271,19 @@ namespace WindowsFormsApplication5
             createMainView(view, mainview); 
         }
 
+        private void DrawStringPointF(PaintEventArgs e, String drawString)
+        {
+            // Create font and brush.
+            Font drawFont = new Font("Arial", 28);
+            SolidBrush drawBrush = new SolidBrush(Color.Red);
+
+            // Create point for upper-left corner of drawing.
+            PointF drawPoint = new PointF(130.0F, 108.0F);
+
+            // Draw string to screen.
+            e.Graphics.DrawString(drawString, drawFont, drawBrush, drawPoint);
+        }
+
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
             GraphicsPath panelPath = new GraphicsPath();
@@ -285,7 +305,9 @@ namespace WindowsFormsApplication5
             //floor
             panelPath.AddPolygon(mainview.traceFloorpoints(walls));
             e.Graphics.FillPath(mainview.FloorBrush, panelPath);
-          
+
+
+            //DrawStringPointF(e, "Level2");
 
         }
 
