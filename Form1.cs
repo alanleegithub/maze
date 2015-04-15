@@ -68,6 +68,8 @@ namespace WindowsFormsApplication5
 
         eyeview mainview = new eyeview();
 
+        string major_version = "V1.1";
+
         int getMapInfo(Point point)
         {
             if (point.X > (map_x - 1) || point.Y > (map_y-1)) return 0;
@@ -266,6 +268,8 @@ namespace WindowsFormsApplication5
         public Form1()
         {
             InitializeComponent();
+
+            label2.Text = major_version;
 
             int[,] view = getPathInfo(direction, whereami);
             createMainView(view, mainview); 
