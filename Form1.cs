@@ -16,6 +16,8 @@ namespace WindowsFormsApplication5
 {
     public partial class Form1 : Form
     {
+        string major_version = "V1.1";
+
         Pen blackPen = new Pen(Color.Black, 1);
         Pen bluePen = new Pen(Color.Blue, 3);
         Pen grayPen = new Pen(Color.Gray, 3);
@@ -28,7 +30,7 @@ namespace WindowsFormsApplication5
 
         int[,,] map = new int[map_level, map_x, map_y]{
                                   
-                                 {{1,0,1,0,0,0,1,1,1,0},
+                                 {{1,0,2,0,0,0,1,1,1,0},
                                   {1,0,1,1,1,1,1,0,1,0},
                                   {1,0,0,0,0,0,0,1,1,0},
                                   {1,1,1,1,1,0,0,1,0,0},
@@ -54,7 +56,7 @@ namespace WindowsFormsApplication5
         enum DIR { EAST, SOUTH, WEST, NORTH };
         DIR direction = DIR.SOUTH;
         Point whereami = new Point(0, 0);
-        int level_now = 0;
+        int level_index = 0;
 
         Point fix_ul = new Point(36, 18);
         Point fix_ll = new Point(36, 218);
@@ -68,13 +70,13 @@ namespace WindowsFormsApplication5
 
         eyeview mainview = new eyeview();
 
-        string major_version = "V1.1";
+        bool level_up = false;
 
         int getMapInfo(Point point)
         {
             if (point.X > (map_x - 1) || point.Y > (map_y-1)) return 0;
             if (point.X < 0 || point.Y < 0) return 0;
-            return map[level_now, point.X, point.Y];
+            return map[level_index, point.X, point.Y];
         }
 
         int[,] getPathInfo(DIR dir, Point p)
@@ -107,7 +109,7 @@ namespace WindowsFormsApplication5
 
                 if (getMapInfo(temp_p) == 0)
                     break;
-
+            
                 t = getLeftRightInfo(dir, temp_p);
                 if ( t > 0)
                 {
@@ -145,6 +147,9 @@ namespace WindowsFormsApplication5
                 }
             }
 
+            if (getMapInfo(p) == 2)
+                count_forward = 6;
+
             status[2, 0] = count_forward;
             status[2, 1] = 4;
 
@@ -161,27 +166,27 @@ namespace WindowsFormsApplication5
             switch (dir)
             {
                 case DIR.SOUTH:
-                    if (p.Y + 1 < map_y && map[level_now, p.X, p.Y + 1] == 1)
+                    if (p.Y + 1 < map_y && map[level_index, p.X, p.Y + 1] > 0)
                         status = 1;//EAST, LEFT
-                    if (p.Y - 1 >= 0 && map[level_now, p.X, p.Y - 1] == 1)
+                    if (p.Y - 1 >= 0 && map[level_index, p.X, p.Y - 1] > 0)
                         status += 2;//WEST, RIGHT
                     break;
                 case DIR.NORTH:
-                    if (p.Y + 1 < map_y && map[level_now, p.X, p.Y + 1] == 1)
+                    if (p.Y + 1 < map_y && map[level_index, p.X, p.Y + 1] > 0)
                         status = 2;//EAST, RIGHT
-                    if (p.Y - 1 >= 0 && map[level_now, p.X, p.Y - 1] == 1)
+                    if (p.Y - 1 >= 0 && map[level_index, p.X, p.Y - 1] > 0)
                         status += 1;//WEST, LEFT
                     break;
                 case DIR.EAST:
-                    if (p.X + 1 < map_x && map[level_now, p.X + 1, p.Y] == 1)
+                    if (p.X + 1 < map_x && map[level_index, p.X + 1, p.Y] > 0)
                         status = 2;//SOUTH, RIGHT
-                    if (p.X - 1 >= 0 && map[level_now, p.X - 1, p.Y] == 1)
+                    if (p.X - 1 >= 0 && map[level_index, p.X - 1, p.Y] > 0)
                         status += 1;//NORTH, LEFT
                     break;
                 case DIR.WEST:
-                    if (p.X + 1 < map_x && map[level_now, p.X + 1, p.Y] == 1)
+                    if (p.X + 1 < map_x && map[level_index, p.X + 1, p.Y] > 0)
                         status = 1;//SOUTH, LEFT
-                    if (p.X - 1 >= 0 && map[level_now, p.X - 1, p.Y] == 1)
+                    if (p.X - 1 >= 0 && map[level_index, p.X - 1, p.Y] > 0)
                         status += 2;//NORTH, RIGHT
                     break;
             }
@@ -322,7 +327,7 @@ namespace WindowsFormsApplication5
             switch(e.KeyCode)
             {
                 case Keys.Down:
-
+                    
                     switch(direction)
                     {
                         case DIR.SOUTH:
@@ -346,10 +351,8 @@ namespace WindowsFormsApplication5
                                 whereami.Y += 1;
                             break;
                     }
-
+                    level_up = false;
                     Console.WriteLine("Down key" + whereami);
-                    
-                   
                     break;
                 case Keys.Up:
 
@@ -363,7 +366,23 @@ namespace WindowsFormsApplication5
                         case DIR.NORTH:
                             whereami.X -= 1;
                             if (whereami.X < 0 || getMapInfo(whereami) == 0)
-                                whereami.X += 1; 
+                                whereami.X += 1;
+                            if (getMapInfo(whereami) == 2)
+                            {
+                                switch(level_up)
+                                {
+                                    case false:
+                                        level_up = true;
+                                        break;
+                                    case true:
+                                        level_index = 1;
+                                        whereami.X = 0;
+                                        whereami.Y = 0;
+                                        direction = DIR.SOUTH;
+                                        level_up = false;
+                                        break;
+                                }
+                            }
                             break;
                         case DIR.EAST:
                              whereami.Y += 1;
@@ -516,6 +535,12 @@ public class eyeview
                                         Color.Black,
                                         Color.Red);
 
+    public LinearGradientBrush LevelBrush = new LinearGradientBrush(
+                                        new Point(0, 0),
+                                        new Point(0, 200),
+                                        Color.Aqua,
+                                        Color.Red);
+
     public enum Composition { BY_TWO, BY_THREE };
 
     public void clearView(List<wall> lists)
@@ -613,6 +638,12 @@ public class eyeview
             case 5:
                 x1 = 136;
                 x2 = 236;
+                color = Brushes.Black;
+                break;
+            case 6:
+                x1 = 136 - 70;
+                x2 = 236 + 70;
+                color = LevelBrush;
                 break;
         }
 
