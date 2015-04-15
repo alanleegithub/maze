@@ -26,9 +26,9 @@ namespace WindowsFormsApplication5
 
         private const int map_x = 10;
         private const int map_y = 10;
-        private const int map_level = 2;
+        int level_index = 0;
 
-        int[,,] map = new int[map_level, map_x, map_y]{
+        int[,,] map = new int[3, map_x, map_y]{
                                   
                                  {{1,0,2,0,0,0,1,1,1,0},
                                   {1,0,1,1,1,1,1,0,1,0},
@@ -50,27 +50,32 @@ namespace WindowsFormsApplication5
                                   {1,1,0,0,0,1,0,1,1,1},
                                   {0,1,1,0,1,1,0,0,0,1},
                                   {0,0,1,0,1,0,0,0,1,1},
-                                  {1,1,1,0,1,1,1,1,1,0}}
+                                  {2,1,1,0,1,1,1,1,1,0}},
+
+                                 {{1,0,1,1,1,1,1,1,1,1},
+                                  {1,0,1,0,0,0,0,0,0,1},
+                                  {1,0,1,0,1,1,1,1,0,1},
+                                  {1,0,1,0,1,0,0,1,0,1},
+                                  {1,0,1,0,1,0,0,1,0,1},
+                                  {1,0,1,0,1,1,0,1,0,1},
+                                  {1,0,1,0,0,0,0,1,0,1},
+                                  {1,0,1,1,1,1,1,1,0,1},
+                                  {1,0,0,0,0,0,0,0,0,1},
+                                  {1,1,1,1,1,1,1,1,1,1}}
         };
 
         enum DIR { EAST, SOUTH, WEST, NORTH };
         DIR direction = DIR.SOUTH;
         Point whereami = new Point(0, 0);
-        int level_index = 0;
-
-        Point fix_ul = new Point(36, 18);
-        Point fix_ll = new Point(36, 218);
-        Point fix_ur = new Point(336, 18);
-        Point fix_lr = new Point(336, 218);
-
-        Point var_ul = new Point(136, 98);
-        Point var_ll = new Point(136, 148);
-        Point var_ur = new Point(236, 98);
-        Point var_lr = new Point(236, 148);
 
         eyeview mainview = new eyeview();
 
         bool level_up = false;
+        int[] r_target = new int[3] { 0, 0, 0 };
+        int[] r_curr = new int[3] { 236, 236, 236 };
+
+        int[] l_target = new int[3] { 0, 0, 0 };
+        int[] l_curr = new int[3] { 236, 236, 236 };
 
         int getMapInfo(Point point)
         {
@@ -193,6 +198,76 @@ namespace WindowsFormsApplication5
             return status;
         }
 
+        public void configLeftBranchView(int state)
+        {
+            switch (state)
+            {
+                case 3:
+                    l_target[0] = 36 + 0;
+                    l_target[1] = 36 + 20;
+                    l_target[2] = 36 + 20;
+                    break;
+                case 2:
+                    l_target[0] = 36 + 10;
+                    l_target[1] = 36 + 10 + 40;
+                    l_target[2] = 36 + 10 + 40;
+                    break;
+                case 1:
+                    l_target[0] = 36 + 35;
+                    l_target[1] = 36 + 35 + 35;
+                    l_target[2] = 36 + 35 + 35;
+                    break;
+                case 0:
+                    l_target[0] = 36 + 80;
+                    l_target[1] = 36 + 80 + 10;
+                    l_target[2] = 36 + 80 + 10;
+                    break;
+            }
+        }
+
+
+
+
+        void configRightBranchView(int state)
+        {
+            switch (state)
+            {
+                case 0:
+                    r_target[0] = 236 + 10;
+                    r_target[1] = 236 + 10 + 20;
+                    r_target[2] = 236 + 10 + 20;
+                    break;
+                case 1:
+                    r_target[0] = 236 + 30;
+                    r_target[1] = 236 + 30 + 35;
+                    r_target[2] = 236 + 30 + 35;
+                    break;
+                case 2:
+                    r_target[0] = 236 + 50;
+                    r_target[1] = 236 + 50 + 40;
+                    r_target[2] = 236 + 50 + 40;
+                    break;
+                case 3:
+                    r_target[0] = 236 + 80;
+                    r_target[1] = 236 + 80 + 20;
+                    r_target[2] = 236 + 80 + 20;
+                    break;
+            }
+        }
+
+        void changeRightBranchView()
+        {
+            if (r_curr[0] != r_target[0])
+            {
+                r_curr[0] += 5;
+                r_curr[1] += 5;
+                r_curr[2] += 5;
+            }
+            else
+                timer1.Enabled = false;
+        }
+
+     
         void createMainView(int[,] view, eyeview mainview)
         {
             int left_view = 10;
@@ -251,30 +326,64 @@ namespace WindowsFormsApplication5
 
             mainview.clearView(walls);
             if (forward_steps <= 4)
-                color = mainview.setMiddleView(4 - forward_steps, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
+            {
+                mainview.configMiddleView(4 - forward_steps);
+                mainview.setMiddleViewColor(4 - forward_steps);
+            }
             else
-                color = mainview.setMiddleView(forward_steps, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
+            {
+                mainview.configMiddleView(forward_steps);
+                mainview.setMiddleViewColor(forward_steps);
+            }
             //Console.WriteLine("forward_steps=" + forward_steps);
             //Console.WriteLine("middle point={0} {1} {2} {3}", var_ll, var_lr, var_ul, var_ur);
             label1.Text = direction + " " + whereami;
             if (left_view == 10)
-                mainview.leftnoBranchView(walls, fix_ul, var_ul, var_ll, fix_ll);
+            {
+                leftviewhandler = mainview.leftnoBranchView;
+            }
             else
-                mainview.leftBranchView(3 - left_view, leftview_walls, walls, var_ul, var_ll);
-            mainview.middleView(walls, var_ul, var_ur, var_lr, var_ll, color);
-            
+            {
+                configLeftBranchView(3 - left_view);
+                mainview.setleftBranchViewColor(3 - left_view);
+
+                if (leftview_walls == eyeview.Composition.BY_TWO)
+                    leftviewhandler = mainview.setLeftBranchViewTwo;
+                else
+                    leftviewhandler = mainview.setLeftBranchViewThree;
+            }
+
+
             if (right_view == 10)
-                mainview.rightnoBranchView(walls, var_ur, fix_ur, fix_lr, var_lr);
+            {
+                rightviewhandler = mainview.rightnoBranchView;
+            }
             else
-                mainview.rightBranchView(3 - right_view, rightview_walls, walls, var_ur, var_lr);
+            {
+                mainview.setrightBranchViewColor(3 - right_view);
+                configRightBranchView(3 - right_view);
+
+                if (rightview_walls == eyeview.Composition.BY_TWO)
+                    rightviewhandler = mainview.setrightBranchViewTwo;
+                else
+                    rightviewhandler = mainview.setrightBranchViewThree;
+            }
+
+            timer1.Enabled = true;
         }
 
-       
+
+        delegate void viewHandler(List<wall> lists, int[] p);
+        viewHandler rightviewhandler;
+        viewHandler leftviewhandler;
+        viewHandler middlehandler;
+
         public Form1()
         {
             InitializeComponent();
 
             label2.Text = major_version;
+            label3.Text = "Level " + level_index.ToString();
 
             int[,] view = getPathInfo(direction, whereami);
             createMainView(view, mainview); 
@@ -297,24 +406,26 @@ namespace WindowsFormsApplication5
         {
             GraphicsPath panelPath = new GraphicsPath();
 
-            foreach(var wall in walls)
+            if (walls.Count != 0)
             {
-                panelPath.AddPolygon(wall.getWallPoints());
-                e.Graphics.FillPath(wall.getWallColor(), panelPath);
-                e.Graphics.DrawPath(blackPen, panelPath);
+                foreach (var wall in walls)
+                {
+                    panelPath.AddPolygon(wall.getWallPoints());
+                    e.Graphics.FillPath(wall.getWallColor(), panelPath);
+                    e.Graphics.DrawPath(blackPen, panelPath);
 
+                    panelPath.Reset();
+                }
+
+                //ceiling
+                panelPath.AddPolygon(mainview.traceCeilingpoints(walls));
+                e.Graphics.FillPath(mainview.CeilingBrush, panelPath);
                 panelPath.Reset();
+
+                //floor
+                panelPath.AddPolygon(mainview.traceFloorpoints(walls));
+                e.Graphics.FillPath(mainview.FloorBrush, panelPath);
             }
-
-            //ceiling
-            panelPath.AddPolygon(mainview.traceCeilingpoints(walls));
-            e.Graphics.FillPath(mainview.CeilingBrush, panelPath);
-            panelPath.Reset();
-
-            //floor
-            panelPath.AddPolygon(mainview.traceFloorpoints(walls));
-            e.Graphics.FillPath(mainview.FloorBrush, panelPath);
-
 
             //DrawStringPointF(e, "Level2");
 
@@ -367,22 +478,6 @@ namespace WindowsFormsApplication5
                             whereami.X -= 1;
                             if (whereami.X < 0 || getMapInfo(whereami) == 0)
                                 whereami.X += 1;
-                            if (getMapInfo(whereami) == 2)
-                            {
-                                switch(level_up)
-                                {
-                                    case false:
-                                        level_up = true;
-                                        break;
-                                    case true:
-                                        level_index = 1;
-                                        whereami.X = 0;
-                                        whereami.Y = 0;
-                                        direction = DIR.SOUTH;
-                                        level_up = false;
-                                        break;
-                                }
-                            }
                             break;
                         case DIR.EAST:
                              whereami.Y += 1;
@@ -395,7 +490,24 @@ namespace WindowsFormsApplication5
                                 whereami.Y += 1;
                             break;
                     }
-                   
+
+                    if (getMapInfo(whereami) == 2)
+                    {
+                        switch (level_up)
+                        {
+                            case false:
+                                level_up = true;
+                                break;
+                            case true:
+                                level_index++;
+                                whereami.X = 0;
+                                whereami.Y = 0;
+                                direction = DIR.SOUTH;
+                                level_up = false;
+                                label3.Text = "Level " + level_index.ToString();
+                                break;
+                        }
+                    }
                     Console.WriteLine("Up key" + whereami);
                     
                     
@@ -443,6 +555,22 @@ namespace WindowsFormsApplication5
             view = getPathInfo(direction, whereami);
             createMainView(view, mainview);
             this.panel1.Refresh();
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            mainview.clearView(walls);
+            //changeRightBranchView();
+            if(leftviewhandler != null)
+                leftviewhandler(walls, l_target);
+
+            mainview.setMiddleView(walls);
+
+            if(rightviewhandler != null)
+                rightviewhandler(walls, r_target);
+           
+            this.panel1.Refresh();
+            timer1.Enabled = false;
         }
 
 
@@ -542,174 +670,169 @@ public class eyeview
                                         Color.Red);
 
     public enum Composition { BY_TWO, BY_THREE };
+    Brush rightside_color, middle_color,leftside_color;
+
+    Point fix_ul = new Point(36, 18);
+    Point fix_ll = new Point(36, 218);
+    Point fix_ur = new Point(336, 18);
+    Point fix_lr = new Point(336, 218);
+
+    Point var_ul = new Point(136, 98);
+    Point var_ll = new Point(136, 148);
+    Point var_ur = new Point(236, 98);
+    Point var_lr = new Point(236, 148);
 
     public void clearView(List<wall> lists)
     {
         lists.Clear();
     }
 
-    public void leftnoBranchView(List<wall> lists, Point x, Point y, Point z, Point w)
+    public void leftnoBranchView(List<wall> lists, int[] p)
     {
-        lists.Add(new wall(x, y, z, w, leftWallBrush));
+        lists.Add(new wall(fix_ul, var_ul, var_ll, fix_ll, leftWallBrush));
+    }
+    
+    public void rightnoBranchView(List<wall> lists, int[] p)
+    {
+        lists.Add(new wall(var_ur, fix_ur, fix_lr, var_lr, rightWallBrush));
     }
 
-    public void rightnoBranchView(List<wall> lists, Point x, Point y, Point z, Point w)
+    public void setleftBranchViewColor(int state)
     {
-        lists.Add(new wall(x, y, z, w, rightWallBrush));
-    }
-
-    public void leftBranchView(int state, Composition n_walls, List<wall> lists, Point x, Point y)
-    {
-        int p1 = 0;
-        int p2 = 0;
-        int p3 = 0;
-        Brush color = Brushes.Black;
-
         switch (state)
         {
             case 3:
-                p1 = 36 + 0;
-                p2 = 36 + 20;
-                p3 = 36 + 20;
-                color = Brushes.LightGray;
+                leftside_color = Brushes.LightGray;
                 break;
             case 2:
-                p1 = 36 + 10;
-                p2 = 36 + 10 + 40;
-                p3 = 36 + 10 + 40;
-                color = Brushes.DarkGray;
-                
+                leftside_color = Brushes.DarkGray;
                 break;
             case 1:
-                p1 = 36 + 35;
-                p2 = 36 + 35 + 35;
-                p3 = 36 + 35 + 35;
-                color = Brushes.Gray;
+                leftside_color = Brushes.Gray;
                 break;
             case 0:
-                p1 = 36 + 80;
-                p2 = 36 + 80 + 10;
-                p3 = 36 + 80 + 10;
-                color = Brushes.DimGray;
+                leftside_color = Brushes.DimGray;
                 break;
-        }
-        lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218), leftWallBrush));
-
-        if (n_walls == Composition.BY_TWO)
-        {
-            lists.Add(new wall(new Point(p1, x.Y), x, y, new Point(p1, y.Y), color));
-        }
-        else
-        {
-            lists.Add(new wall(new Point(p1, getLeftUpperCoordY(p3)), new Point(p3, getLeftUpperCoordY(p3)), new Point(p3, getLeftLowerCoordY(p3)), new Point(p1, getLeftLowerCoordY(p3)), Brushes.DarkGray));
-            lists.Add(new wall(new Point(p3, getLeftUpperCoordY(p3)), x, y, new Point(p3, getLeftLowerCoordY(p3)), leftWallBrush));
         }
     }
 
+    public void setLeftBranchViewTwo(List<wall> lists, int[] p)
+    {
+        lists.Add(new wall(new Point(36, 18), new Point(p[0], getLeftUpperCoordY(p[0])), new Point(p[0], getLeftLowerCoordY(p[0])), new Point(36, 218), leftWallBrush));
+        lists.Add(new wall(new Point(p[0], var_ul.Y), var_ul, var_ll, new Point(p[0], var_ll.Y), leftside_color));
+    }
 
-    public Brush setMiddleView(int state, ref Point x, ref Point y, ref Point z, ref Point w)
+    public void setLeftBranchViewThree(List<wall> lists, int[] p)
+    {
+        lists.Add(new wall(new Point(36, 18), new Point(p[0], getLeftUpperCoordY(p[0])), new Point(p[0], getLeftLowerCoordY(p[0])), new Point(36, 218), leftWallBrush));
+        lists.Add(new wall(new Point(p[0], getLeftUpperCoordY(p[2])), new Point(p[2], getLeftUpperCoordY(p[2])), new Point(p[2], getLeftLowerCoordY(p[2])), new Point(p[0], getLeftLowerCoordY(p[2])), Brushes.DarkGray));
+        lists.Add(new wall(new Point(p[2], getLeftUpperCoordY(p[2])), var_ul, var_ll, new Point(p[2], getLeftLowerCoordY(p[2])), leftWallBrush));
+    }
+
+    public void setMiddleViewColor(int state)
+    {
+        switch (state)
+        {
+            case 0:
+                middle_color = Brushes.DimGray;
+                break;
+            case 1:
+                middle_color = Brushes.Gray;
+                break;
+            case 2:
+                middle_color = Brushes.DarkGray;
+                break;
+            case 3:
+                middle_color = Brushes.LightGray;
+                break;
+            case 5:
+                middle_color = Brushes.Black;
+                break;
+            case 6:
+                middle_color = LevelBrush;
+                break;
+        }
+    }
+
+    public void configMiddleView(int state)
     {
         int x1 = 0;
         int x2 = 0;
-        Brush color = Brushes.Black;
 
         switch (state)
         {
             case 0:
                 x1 = 136;
                 x2 = 236;
-                color = Brushes.DimGray;
                 break;
             case 1:
                 x1 = 136 - 20;
                 x2 = 236 + 20;
-                color = Brushes.Gray;
                 break;
             case 2:
                 x1 = 136 - 40;
                 x2 = 236 + 40;
-                color = Brushes.DarkGray;
                 break;
             case 3:
                 x1 = 136 - 70;
                 x2 = 236 + 70;
-                color = Brushes.LightGray;
                 break;
             case 5:
                 x1 = 136;
                 x2 = 236;
-                color = Brushes.Black;
                 break;
             case 6:
                 x1 = 136 - 70;
                 x2 = 236 + 70;
-                color = LevelBrush;
                 break;
         }
 
-        x.X = x1;
-        x.Y = getLeftLowerCoordY(x1);
-        y.X = x2;
-        y.Y = getRightLowerCoordY(x2);
-        z.X = x1;
-        z.Y = getLeftUpperCoordY(x1);
-        w.X = x2;
-        w.Y = getRightUpperCoordY(x2);
-        
-        return color;
+        var_ll.X = x1;
+        var_ll.Y = getLeftLowerCoordY(x1);
+        var_lr.X = x2;
+        var_lr.Y = getRightLowerCoordY(x2);
+        var_ul.X = x1;
+        var_ul.Y = getLeftUpperCoordY(x1);
+        var_ur.X = x2;
+        var_ur.Y = getRightUpperCoordY(x2);
     }
 
-    public void middleView(List<wall> lists, Point x, Point y, Point z, Point w, Brush color)
+
+    public void setMiddleView(List<wall> lists)
     {
-        lists.Add(new wall(x, y, z, w, color));
+        lists.Add(new wall(var_ul, var_ur, var_lr, var_ll, middle_color));
     }
 
-    public void rightBranchView(int state, Composition n_walls, List<wall> lists, Point x, Point y)
+    public void setrightBranchViewColor(int state)
     {
-        int p1 = 0;
-        int p2 = 0;
-        int p3 = 0;
-        Brush color = Brushes.Black;
-
         switch (state)
         {
             case 0:
-                p1 = 236 + 10;
-                p2 = 236 + 10 + 10;
-                p3 = 236 + 10 + 10;
-                color = Brushes.DimGray;
+                rightside_color = Brushes.DimGray;
                 break;
             case 1:
-                p1 = 236 + 30;
-                p2 = 236 + 30 + 35;
-                p3 = 236 + 30 + 35;
-                color = Brushes.Gray;
+                rightside_color = Brushes.Gray;
                 break;
             case 2:
-                p1 = 236 + 50;
-                p2 = 236 + 50 + 40;
-                p3 = 236 + 50 + 40;
-                color = Brushes.DarkGray;
+                rightside_color = Brushes.DarkGray;
                 break;
             case 3:
-                p1 = 236 + 80;
-                p2 = 236 + 80 + 20;
-                p3 = 236 + 80 + 20;
-                color = Brushes.LightGray;
+                rightside_color = Brushes.LightGray;
                 break;
         }
+    }
 
-        if (n_walls == Composition.BY_TWO)
-        {
-            lists.Add(new wall(x, new Point(p3, x.Y), new Point(p3, y.Y), y, color));
-        }
-        else
-        {
-            lists.Add(new wall(x, new Point(p1, getRightUpperCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), y, rightWallBrush));
-            lists.Add(new wall(new Point(p1, getRightUpperCoordY(p1)), new Point(p2, getRightUpperCoordY(p1)), new Point(p2, getRightLowerCoordY(p1)), new Point(p1, getRightLowerCoordY(p1)), Brushes.Gray));
-        }
+    public void setrightBranchViewTwo(List<wall> lists, int[] p)
+    {
+        lists.Add(new wall(var_ur, new Point(p[2], var_ur.Y), new Point(p[2], var_lr.Y), var_lr, rightside_color));
+        lists.Add(new wall(new Point(p[2], getRightUpperCoordY(p[2])), new Point(336, 18), new Point(336, 218), new Point(p[2], getRightLowerCoordY(p[2])), rightWallBrush));
+    }
 
-        lists.Add(new wall(new Point(p3, getRightUpperCoordY(p3)), new Point(336, 18), new Point(336, 218), new Point(p3, getRightLowerCoordY(p3)), rightWallBrush));
+    public void setrightBranchViewThree(List<wall> lists, int[] p)
+    {
+        lists.Add(new wall(var_ur, new Point(p[0], getRightUpperCoordY(p[0])), new Point(p[0], getRightLowerCoordY(p[0])), var_lr, rightWallBrush));
+        lists.Add(new wall(new Point(p[0], getRightUpperCoordY(p[0])), new Point(p[1], getRightUpperCoordY(p[0])), new Point(p[1], getRightLowerCoordY(p[0])), new Point(p[0], getRightLowerCoordY(p[0])), Brushes.Gray));
+        lists.Add(new wall(new Point(p[2], getRightUpperCoordY(p[2])), new Point(336, 18), new Point(336, 218), new Point(p[2], getRightLowerCoordY(p[2])), rightWallBrush));
     }
 
     public Point[] traceCeilingpoints(List<wall> lists)
@@ -738,22 +861,22 @@ public class eyeview
         return all;
     }
 
-    int getRightUpperCoordY(int x)
+    public int getRightUpperCoordY(int x)
     {
         return (286 - 4 * x / 5);
     }
 
-    int getRightLowerCoordY(int x)
+    public int getRightLowerCoordY(int x)
     {
         return (7 * x / 10 - 17);
     }
 
-    int getLeftUpperCoordY(int x)
+    public int getLeftUpperCoordY(int x)
     {
         return (4 * x / 5 - 10);
     }
 
-    int getLeftLowerCoordY(int x)
+    public int getLeftLowerCoordY(int x)
     {
         return (243 - 7 * x / 10);
     }
