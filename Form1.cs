@@ -88,7 +88,7 @@ namespace WindowsFormsApplication5
                     
                 }
 
-                //Console.WriteLine("p="+temp_p);
+                Console.WriteLine("p="+temp_p);
 
                 if (getMapInfo(temp_p) == 0)
                     break;
@@ -126,15 +126,15 @@ namespace WindowsFormsApplication5
                 if (getMapInfo(temp_p) == 1)
                 {
                     count_forward++;
-                    //Console.WriteLine("forward + 1");
+                    Console.WriteLine("forward + 1");
                 }
             }
 
             status[2, 0] = count_forward;
             status[2, 1] = 4;
 
-            //for (int i = 0; i < 3; i++ )
-            //    Console.WriteLine("status=" + status[i,0] + status[i,1]);
+            for (int i = 0; i < 3; i++ )
+                Console.WriteLine("status=" + status[i,0] + status[i,1]);
             return status;
         }
 
@@ -183,9 +183,6 @@ namespace WindowsFormsApplication5
             bool right_view_two_walls;
             Brush color;
 
-            eyeview.Composition leftview_walls = eyeview.Composition.BY_THREE;
-            eyeview.Composition rightview_walls = eyeview.Composition.BY_THREE;
-
             for (int i = 0; i < 3; i++)
                 if (view[i, 1] > 0)
                 {
@@ -208,51 +205,43 @@ namespace WindowsFormsApplication5
                     }
                 }
             
-            //Console.WriteLine("view=" + left_view + right_view);
+            Console.WriteLine("view=" + left_view + right_view);
 
             // only one side branch
             left_view_two_walls = right_view_two_walls = (one_or_two_branches < 3 && one_or_two_branches > 0);
-            //Console.WriteLine("bool1=" + left_view_two_walls);
-            // left side branch position is closer than right side branch
+            Console.WriteLine("bool1=" + left_view_two_walls);
+            // left side branch is closer than right side branch
             left_view_two_walls |= (left_view > right_view);
-            //Console.WriteLine("bool2=" + left_view_two_walls);
-            // left side branch position is the same with right side branch 
-            left_view_two_walls |= (left_view == right_view);
-            //Console.WriteLine("bool4=" + left_view_two_walls);
+            Console.WriteLine("bool2=" + left_view_two_walls);
             // start point or stop point
             left_view_two_walls &= (forward_steps - 1) == left_view;
-            //Console.WriteLine("bool3=" + left_view_two_walls + " " + left_view + " " + forward_steps);
-            leftview_walls = left_view_two_walls ? eyeview.Composition.BY_TWO : eyeview.Composition.BY_THREE;
+            Console.WriteLine("bool3=" + left_view_two_walls);
 
-
-            // right side branch position is closer than left side branch
+            // left side branch is closer than right side branch
             right_view_two_walls |= (left_view < right_view);
-            // right side branch position is the same with left side branch 
-            right_view_two_walls |= (left_view == right_view);
-            //Console.WriteLine("bool4=" + right_view_two_walls);
+            Console.WriteLine("bool4=" + right_view_two_walls);
             // start point or stop point
             right_view_two_walls &= (forward_steps - 1) == right_view;
-            //Console.WriteLine("bool5=" + right_view_two_walls);
-            rightview_walls = right_view_two_walls ? eyeview.Composition.BY_TWO : eyeview.Composition.BY_THREE;
+            Console.WriteLine("bool5=" + right_view_two_walls);
 
             mainview.clearView(walls);
             if (forward_steps == 5)
                 color = mainview.setMiddleView(5, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
             else
                 color = mainview.setMiddleView(4 - forward_steps, ref var_ll, ref var_lr, ref var_ul, ref var_ur);
-            //Console.WriteLine("forward_steps=" + forward_steps);
-            //Console.WriteLine("middle point={0} {1} {2} {3}", var_ll, var_lr, var_ul, var_ur);
-            label1.Text = direction + " " + whereami;
+            Console.WriteLine("middle=" + forward_steps);
+            Console.WriteLine("middle point={0} {1} {2} {3}", var_ll, var_lr, var_ul, var_ur);
+
             if (left_view == 10)
                 mainview.leftnoBranchView(walls, fix_ul, var_ul, var_ll, fix_ll);
             else
-                mainview.leftBranchView(3 - left_view, leftview_walls, walls, var_ul, var_ll);
+                mainview.leftBranchView(3 - left_view, left_view_two_walls, walls, var_ul, var_ll);
             mainview.middleView(walls, var_ul, var_ur, var_lr, var_ll, color);
             
             if (right_view == 10)
                 mainview.rightnoBranchView(walls, var_ur, fix_ur, fix_lr, var_lr);
             else
-                mainview.rightBranchView(3 - right_view, rightview_walls, walls, var_ur, var_lr);
+                mainview.rightBranchView(3 - right_view, right_view_two_walls, walls, var_ur, var_lr);
         }
 
        
@@ -490,8 +479,6 @@ public class eyeview
                                         Color.Black,
                                         Color.Red);
 
-    public enum Composition { BY_TWO, BY_THREE };
-
     public void clearView(List<wall> lists)
     {
         lists.Clear();
@@ -507,7 +494,7 @@ public class eyeview
         lists.Add(new wall(x, y, z, w, rightWallBrush));
     }
 
-    public void leftBranchView(int state, Composition n_walls, List<wall> lists, Point x, Point y)
+    public void leftBranchView(int state, bool two_walls, List<wall> lists, Point x, Point y)
     {
         int p1 = 0;
         int p2 = 0;
@@ -544,7 +531,7 @@ public class eyeview
         }
         lists.Add(new wall(new Point(36, 18), new Point(p1, getLeftUpperCoordY(p1)), new Point(p1, getLeftLowerCoordY(p1)), new Point(36, 218), leftWallBrush));
 
-        if (n_walls == Composition.BY_TWO)
+        if (two_walls == true)
         {
             lists.Add(new wall(new Point(p1, x.Y), x, y, new Point(p1, y.Y), color));
         }
@@ -607,7 +594,7 @@ public class eyeview
         lists.Add(new wall(x, y, z, w, color));
     }
 
-    public void rightBranchView(int state, Composition n_walls, List<wall> lists, Point x, Point y)
+    public void rightBranchView(int state, bool two_walls, List<wall> lists, Point x, Point y)
     {
         int p1 = 0;
         int p2 = 0;
@@ -642,7 +629,7 @@ public class eyeview
                 break;
         }
 
-        if (n_walls == Composition.BY_TWO)
+        if (two_walls == true)
         {
             lists.Add(new wall(x, new Point(p3, x.Y), new Point(p3, y.Y), y, color));
         }
