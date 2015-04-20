@@ -202,22 +202,22 @@ namespace WindowsFormsApplication5
         {
             switch (state)
             {
-                case 3:
+                case 0:
                     l_target[0] = 36 + 0;
                     l_target[1] = 36 + 20;
                     l_target[2] = 36 + 20;
                     break;
-                case 2:
+                case 1:
                     l_target[0] = 36 + 10;
                     l_target[1] = 36 + 10 + 40;
                     l_target[2] = 36 + 10 + 40;
                     break;
-                case 1:
+                case 2:
                     l_target[0] = 36 + 35;
                     l_target[1] = 36 + 35 + 35;
                     l_target[2] = 36 + 35 + 35;
                     break;
-                case 0:
+                case 3:
                     l_target[0] = 36 + 80;
                     l_target[1] = 36 + 80 + 10;
                     l_target[2] = 36 + 80 + 10;
@@ -232,22 +232,22 @@ namespace WindowsFormsApplication5
         {
             switch (state)
             {
-                case 0:
+                case 3:
                     r_target[0] = 236 + 10;
                     r_target[1] = 236 + 10 + 20;
                     r_target[2] = 236 + 10 + 20;
                     break;
-                case 1:
+                case 2:
                     r_target[0] = 236 + 30;
                     r_target[1] = 236 + 30 + 35;
                     r_target[2] = 236 + 30 + 35;
                     break;
-                case 2:
+                case 1:
                     r_target[0] = 236 + 50;
                     r_target[1] = 236 + 50 + 40;
                     r_target[2] = 236 + 50 + 40;
                     break;
-                case 3:
+                case 0:
                     r_target[0] = 236 + 80;
                     r_target[1] = 236 + 80 + 20;
                     r_target[2] = 236 + 80 + 20;
@@ -325,27 +325,19 @@ namespace WindowsFormsApplication5
             //                          + forward_steps);
 
             mainview.clearView(walls);
-            if (forward_steps <= 4)
-            {
-                mainview.configMiddleView(4 - forward_steps);
-                mainview.setMiddleViewColor(4 - forward_steps);
-            }
-            else
-            {
-                mainview.configMiddleView(forward_steps);
-                mainview.setMiddleViewColor(forward_steps);
-            }
+            
+            mainview.configMiddleView(forward_steps);
+            mainview.setMiddleViewColor(forward_steps);
+
             //Console.WriteLine("forward_steps=" + forward_steps);
             //Console.WriteLine("middle point={0} {1} {2} {3}", var_ll, var_lr, var_ul, var_ur);
             label1.Text = direction + " " + whereami;
             if (left_view == 10)
-            {
                 leftviewhandler = mainview.leftnoBranchView;
-            }
             else
             {
-                configLeftBranchView(3 - left_view);
-                mainview.setleftBranchViewColor(3 - left_view);
+                configLeftBranchView(left_view);
+                mainview.setleftBranchViewColor(left_view);
 
                 if (leftview_walls == eyeview.Composition.BY_TWO)
                     leftviewhandler = mainview.setLeftBranchViewTwo;
@@ -355,13 +347,11 @@ namespace WindowsFormsApplication5
 
 
             if (right_view == 10)
-            {
                 rightviewhandler = mainview.rightnoBranchView;
-            }
             else
             {
-                mainview.setrightBranchViewColor(3 - right_view);
-                configRightBranchView(3 - right_view);
+                mainview.setrightBranchViewColor(right_view);
+                configRightBranchView(right_view);
 
                 if (rightview_walls == eyeview.Composition.BY_TWO)
                     rightviewhandler = mainview.setrightBranchViewTwo;
@@ -554,7 +544,6 @@ namespace WindowsFormsApplication5
             
             view = getPathInfo(direction, whereami);
             createMainView(view, mainview);
-            this.panel1.Refresh();
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -571,10 +560,7 @@ namespace WindowsFormsApplication5
            
             this.panel1.Refresh();
             timer1.Enabled = false;
-        }
-
-
-       
+        }       
     }
 }
 
@@ -701,16 +687,16 @@ public class eyeview
     {
         switch (state)
         {
-            case 3:
+            case 0:
                 leftside_color = Brushes.LightGray;
                 break;
-            case 2:
+            case 1:
                 leftside_color = Brushes.DarkGray;
                 break;
-            case 1:
+            case 2:
                 leftside_color = Brushes.Gray;
                 break;
-            case 0:
+            case 3:
                 leftside_color = Brushes.DimGray;
                 break;
         }
@@ -733,16 +719,16 @@ public class eyeview
     {
         switch (state)
         {
-            case 0:
+            case 4:
                 middle_color = Brushes.DimGray;
                 break;
-            case 1:
+            case 3:
                 middle_color = Brushes.Gray;
                 break;
             case 2:
                 middle_color = Brushes.DarkGray;
                 break;
-            case 3:
+            case 1:
                 middle_color = Brushes.LightGray;
                 break;
             case 5:
@@ -761,11 +747,11 @@ public class eyeview
 
         switch (state)
         {
-            case 0:
+            case 4:
                 x1 = 136;
                 x2 = 236;
                 break;
-            case 1:
+            case 3:
                 x1 = 136 - 20;
                 x2 = 236 + 20;
                 break;
@@ -773,7 +759,7 @@ public class eyeview
                 x1 = 136 - 40;
                 x2 = 236 + 40;
                 break;
-            case 3:
+            case 1:
                 x1 = 136 - 70;
                 x2 = 236 + 70;
                 break;
@@ -807,16 +793,16 @@ public class eyeview
     {
         switch (state)
         {
-            case 0:
+            case 3:
                 rightside_color = Brushes.DimGray;
                 break;
-            case 1:
+            case 2:
                 rightside_color = Brushes.Gray;
                 break;
-            case 2:
+            case 1:
                 rightside_color = Brushes.DarkGray;
                 break;
-            case 3:
+            case 0:
                 rightside_color = Brushes.LightGray;
                 break;
         }
