@@ -345,6 +345,7 @@ namespace WindowsFormsApplication5
                     leftviewhandler = mainview.setLeftBranchViewThree;
             }
 
+            middleviewhandler = mainview.setMiddleView;
 
             if (right_view == 10)
                 rightviewhandler = mainview.rightnoBranchView;
@@ -366,7 +367,7 @@ namespace WindowsFormsApplication5
         delegate void viewHandler(List<wall> lists, int[] p);
         viewHandler rightviewhandler;
         viewHandler leftviewhandler;
-        viewHandler middlehandler;
+        viewHandler middleviewhandler;
 
         public Form1()
         {
@@ -553,7 +554,8 @@ namespace WindowsFormsApplication5
             if(leftviewhandler != null)
                 leftviewhandler(walls, l_target);
 
-            mainview.setMiddleView(walls);
+            if (middleviewhandler != null)
+                middleviewhandler(walls, l_target);
 
             if(rightviewhandler != null)
                 rightviewhandler(walls, r_target);
@@ -784,7 +786,7 @@ public class eyeview
     }
 
 
-    public void setMiddleView(List<wall> lists)
+    public void setMiddleView(List<wall> lists, int[] p)
     {
         lists.Add(new wall(var_ul, var_ur, var_lr, var_ll, middle_color));
     }
