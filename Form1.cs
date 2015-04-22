@@ -267,7 +267,7 @@ namespace WindowsFormsApplication5
                 timer1.Enabled = false;
         }
 
-        delegate void viewHandler(List<wall> lists, int[] p);
+        delegate bool viewHandler(List<wall> lists, int[] p);
         viewHandler rightviewhandler;
         viewHandler leftviewhandler;
         viewHandler middleviewhandler;
@@ -336,39 +336,51 @@ namespace WindowsFormsApplication5
             mainview.configMiddleView(forward_steps);
             mainview.setMiddleViewColor(forward_steps);
 
-            configLeftBranchView(left_view);
-            mainview.setleftBranchViewColor(left_view);
-
-            mainview.setrightBranchViewColor(right_view);
-            configRightBranchView(right_view);
-        }
-
-        void createMainViewForm()
-        {
-            mainview.clearView(walls);
-
-            label1.Text = direction + " " + whereami;
             if (left_view == 10)
-                mainview.leftnoBranchView(walls, l_target);
+                leftviewhandler = mainview.leftnoBranchView;
             else
             {
+                configLeftBranchView(left_view);
+                mainview.setleftBranchViewColor(left_view);
+
                 if (leftview_walls == eyeview.Composition.BY_TWO)
-                    mainview.setLeftBranchViewTwo(walls, l_target);
+                    leftviewhandler = mainview.setLeftBranchViewTwo;
                 else
-                    mainview.setLeftBranchViewThree(walls, l_target);
+                    leftviewhandler = mainview.setLeftBranchViewThree;
             }
 
-            mainview.setMiddleView(walls, l_target);
+            middleviewhandler = mainview.setMiddleView;
 
             if (right_view == 10)
-                mainview.rightnoBranchView(walls, r_target);
+                rightviewhandler = mainview.rightnoBranchView;
             else
             {
+                mainview.setrightBranchViewColor(right_view);
+                configRightBranchView(right_view);
+
                 if (rightview_walls == eyeview.Composition.BY_TWO)
-                    mainview.setrightBranchViewTwo(walls, r_target);
+                    rightviewhandler = mainview.setrightBranchViewTwo;
                 else
-                    mainview.setrightBranchViewThree(walls, r_target);
+                    rightviewhandler = mainview.setrightBranchViewThree;
             }
+        }
+
+        bool createMainViewForm()
+        {
+            bool flag = false;
+
+            mainview.clearView(walls);
+
+            if (leftviewhandler != null)
+                flag = leftviewhandler(walls, l_target);
+
+            if(middleviewhandler != null)
+                flag &= middleviewhandler(walls, l_target);
+
+            if (rightviewhandler != null)
+                flag &= rightviewhandler(walls, r_target);
+
+            return flag;
         }
 
 
@@ -556,9 +568,13 @@ namespace WindowsFormsApplication5
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            createMainViewForm();
+            bool stop_flag;
+
+            stop_flag = createMainViewForm();
             this.panel1.Refresh();
-            timer1.Enabled = false;
+
+            if(stop_flag == true)
+                timer1.Enabled = false;
         }       
     }
 }
@@ -672,14 +688,16 @@ public class eyeview
         lists.Clear();
     }
 
-    public void leftnoBranchView(List<wall> lists, int[] p)
+    public bool leftnoBranchView(List<wall> lists, int[] p)
     {
         lists.Add(new wall(fix_ul, var_ul, var_ll, fix_ll, leftWallBrush));
+        return true;
     }
     
-    public void rightnoBranchView(List<wall> lists, int[] p)
+    public bool rightnoBranchView(List<wall> lists, int[] p)
     {
         lists.Add(new wall(var_ur, fix_ur, fix_lr, var_lr, rightWallBrush));
+        return true;
     }
 
     public void setleftBranchViewColor(int state)
@@ -701,17 +719,19 @@ public class eyeview
         }
     }
 
-    public void setLeftBranchViewTwo(List<wall> lists, int[] p)
+    public bool setLeftBranchViewTwo(List<wall> lists, int[] p)
     {
         lists.Add(new wall(new Point(36, 18), new Point(p[0], getLeftUpperCoordY(p[0])), new Point(p[0], getLeftLowerCoordY(p[0])), new Point(36, 218), leftWallBrush));
         lists.Add(new wall(new Point(p[0], var_ul.Y), var_ul, var_ll, new Point(p[0], var_ll.Y), leftside_color));
+        return true;
     }
 
-    public void setLeftBranchViewThree(List<wall> lists, int[] p)
+    public bool setLeftBranchViewThree(List<wall> lists, int[] p)
     {
         lists.Add(new wall(new Point(36, 18), new Point(p[0], getLeftUpperCoordY(p[0])), new Point(p[0], getLeftLowerCoordY(p[0])), new Point(36, 218), leftWallBrush));
         lists.Add(new wall(new Point(p[0], getLeftUpperCoordY(p[2])), new Point(p[2], getLeftUpperCoordY(p[2])), new Point(p[2], getLeftLowerCoordY(p[2])), new Point(p[0], getLeftLowerCoordY(p[2])), Brushes.DarkGray));
         lists.Add(new wall(new Point(p[2], getLeftUpperCoordY(p[2])), var_ul, var_ll, new Point(p[2], getLeftLowerCoordY(p[2])), leftWallBrush));
+        return true;
     }
 
     public void setMiddleViewColor(int state)
@@ -783,10 +803,10 @@ public class eyeview
         var_ur.Y = getRightUpperCoordY(x2);
     }
 
-
-    public void setMiddleView(List<wall> lists, int[] p)
+    public bool setMiddleView(List<wall> lists, int[] p)
     {
         lists.Add(new wall(var_ul, var_ur, var_lr, var_ll, middle_color));
+        return true;
     }
 
     public void setrightBranchViewColor(int state)
@@ -808,17 +828,19 @@ public class eyeview
         }
     }
 
-    public void setrightBranchViewTwo(List<wall> lists, int[] p)
+    public bool setrightBranchViewTwo(List<wall> lists, int[] p)
     {
         lists.Add(new wall(var_ur, new Point(p[2], var_ur.Y), new Point(p[2], var_lr.Y), var_lr, rightside_color));
         lists.Add(new wall(new Point(p[2], getRightUpperCoordY(p[2])), new Point(336, 18), new Point(336, 218), new Point(p[2], getRightLowerCoordY(p[2])), rightWallBrush));
+        return true;
     }
 
-    public void setrightBranchViewThree(List<wall> lists, int[] p)
+    public bool setrightBranchViewThree(List<wall> lists, int[] p)
     {
         lists.Add(new wall(var_ur, new Point(p[0], getRightUpperCoordY(p[0])), new Point(p[0], getRightLowerCoordY(p[0])), var_lr, rightWallBrush));
         lists.Add(new wall(new Point(p[0], getRightUpperCoordY(p[0])), new Point(p[1], getRightUpperCoordY(p[0])), new Point(p[1], getRightLowerCoordY(p[0])), new Point(p[0], getRightLowerCoordY(p[0])), Brushes.Gray));
         lists.Add(new wall(new Point(p[2], getRightUpperCoordY(p[2])), new Point(336, 18), new Point(336, 218), new Point(p[2], getRightLowerCoordY(p[2])), rightWallBrush));
+        return true;
     }
 
     public Point[] traceCeilingpoints(List<wall> lists)
