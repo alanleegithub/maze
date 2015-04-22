@@ -267,18 +267,22 @@ namespace WindowsFormsApplication5
                 timer1.Enabled = false;
         }
 
-     
-        void createMainView(int[,] view, eyeview mainview)
-        {
-            int left_view = 10;
-            int right_view = 10;
-            int forward_steps = 0;
-            bool left_view_two_walls;
-            bool right_view_two_walls;
-            Brush color;
+        delegate void viewHandler(List<wall> lists, int[] p);
+        viewHandler rightviewhandler;
+        viewHandler leftviewhandler;
+        viewHandler middleviewhandler;
 
-            eyeview.Composition leftview_walls = eyeview.Composition.BY_THREE;
-            eyeview.Composition rightview_walls = eyeview.Composition.BY_THREE;
+
+        int left_view;
+        int right_view;
+        int forward_steps = 0;
+        eyeview.Composition leftview_walls = eyeview.Composition.BY_THREE;
+        eyeview.Composition rightview_walls = eyeview.Composition.BY_THREE;
+
+        void getMainViewFormInfo(int[,] view)
+        {
+            left_view = 10;
+            right_view = 10;
 
             for (int i = 0; i < 3; i++)
                 if (view[i, 1] > 0)
@@ -299,6 +303,12 @@ namespace WindowsFormsApplication5
                             break;
                     }
                 }
+        }
+
+        void configMainViewForm()
+        {
+            bool left_view_two_walls;
+            bool right_view_two_walls;
             
             //Console.WriteLine("view=" + left_view + right_view);
 
@@ -311,7 +321,7 @@ namespace WindowsFormsApplication5
             // start point or stop point
             left_view_two_walls &= (forward_steps - 1) == left_view;
             leftview_walls = left_view_two_walls ? eyeview.Composition.BY_TWO : eyeview.Composition.BY_THREE;
-            
+
             // right side branch position is closer than left side branch
             right_view_two_walls |= (left_view < right_view);
             // right side branch position is the same with left side branch 
@@ -323,51 +333,44 @@ namespace WindowsFormsApplication5
             //Console.WriteLine("bool=" + left_view + " "
             //                          + right_view + " "
             //                          + forward_steps);
-
-            mainview.clearView(walls);
-            
             mainview.configMiddleView(forward_steps);
             mainview.setMiddleViewColor(forward_steps);
 
-            //Console.WriteLine("forward_steps=" + forward_steps);
-            //Console.WriteLine("middle point={0} {1} {2} {3}", var_ll, var_lr, var_ul, var_ur);
-            label1.Text = direction + " " + whereami;
-            if (left_view == 10)
-                leftviewhandler = mainview.leftnoBranchView;
-            else
-            {
-                configLeftBranchView(left_view);
-                mainview.setleftBranchViewColor(left_view);
+            configLeftBranchView(left_view);
+            mainview.setleftBranchViewColor(left_view);
 
-                if (leftview_walls == eyeview.Composition.BY_TWO)
-                    leftviewhandler = mainview.setLeftBranchViewTwo;
-                else
-                    leftviewhandler = mainview.setLeftBranchViewThree;
-            }
-
-            middleviewhandler = mainview.setMiddleView;
-
-            if (right_view == 10)
-                rightviewhandler = mainview.rightnoBranchView;
-            else
-            {
-                mainview.setrightBranchViewColor(right_view);
-                configRightBranchView(right_view);
-
-                if (rightview_walls == eyeview.Composition.BY_TWO)
-                    rightviewhandler = mainview.setrightBranchViewTwo;
-                else
-                    rightviewhandler = mainview.setrightBranchViewThree;
-            }
-
-            timer1.Enabled = true;
+            mainview.setrightBranchViewColor(right_view);
+            configRightBranchView(right_view);
         }
 
+        void createMainViewForm()
+        {
+            mainview.clearView(walls);
 
-        delegate void viewHandler(List<wall> lists, int[] p);
-        viewHandler rightviewhandler;
-        viewHandler leftviewhandler;
-        viewHandler middleviewhandler;
+            label1.Text = direction + " " + whereami;
+            if (left_view == 10)
+                mainview.leftnoBranchView(walls, l_target);
+            else
+            {
+                if (leftview_walls == eyeview.Composition.BY_TWO)
+                    mainview.setLeftBranchViewTwo(walls, l_target);
+                else
+                    mainview.setLeftBranchViewThree(walls, l_target);
+            }
+
+            mainview.setMiddleView(walls, l_target);
+
+            if (right_view == 10)
+                mainview.rightnoBranchView(walls, r_target);
+            else
+            {
+                if (rightview_walls == eyeview.Composition.BY_TWO)
+                    mainview.setrightBranchViewTwo(walls, r_target);
+                else
+                    mainview.setrightBranchViewThree(walls, r_target);
+            }
+        }
+
 
         public Form1()
         {
@@ -377,7 +380,9 @@ namespace WindowsFormsApplication5
             label3.Text = "Level " + level_index.ToString();
 
             int[,] view = getPathInfo(direction, whereami);
-            createMainView(view, mainview); 
+            getMainViewFormInfo(view);
+            configMainViewForm();
+            createMainViewForm();
         }
 
         private void DrawStringPointF(PaintEventArgs e, String drawString)
@@ -544,22 +549,14 @@ namespace WindowsFormsApplication5
             }
             
             view = getPathInfo(direction, whereami);
-            createMainView(view, mainview);
+            getMainViewFormInfo(view);
+            configMainViewForm();
+            timer1.Enabled = true;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            mainview.clearView(walls);
-            //changeRightBranchView();
-            if(leftviewhandler != null)
-                leftviewhandler(walls, l_target);
-
-            if (middleviewhandler != null)
-                middleviewhandler(walls, l_target);
-
-            if(rightviewhandler != null)
-                rightviewhandler(walls, r_target);
-           
+            createMainViewForm();
             this.panel1.Refresh();
             timer1.Enabled = false;
         }       
@@ -741,6 +738,7 @@ public class eyeview
                 break;
         }
     }
+
 
     public void configMiddleView(int state)
     {
